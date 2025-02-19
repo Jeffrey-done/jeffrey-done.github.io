@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蜜糖少女导航站 🍭</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --pink: #FFB6C1;
+            --lavender: #FFF0F5;
+            --rose: #FF69B4;
+            --purple: #D8BFD8;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--lavender), var(--pink));
+            font-family: 'Arial Rounded MT Bold', cursive;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--rose);
+            font-size: 3em;
+            text-shadow: 2px 2px 0px white;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* 搜索框样式 */
+        .search-container {
+            max-width: 600px;
+            margin: 30px auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sweet-search {
+            display: flex;
+            gap: 10px;
+            position: relative;
+        }
+
+        .unicorn-input {
+            flex: 1;
+            padding: 15px 25px;
+            border: 3px solid var(--pink);
+            border-radius: 30px;
+            font-size: 1.2em;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.3);
+        }
+
+        .unicorn-input:focus {
+            outline: none;
+            border-color: var(--rose);
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+            transform: scale(1.02);
+        }
+
+        .unicorn-input::placeholder {
+            color: #FFA1C9;
+            opacity: 0.8;
+        }
+
+        .candy-button {
+            background: linear-gradient(45deg, var(--rose), #FF99CC);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .candy-button:hover {
+            transform: translateY(-3px) rotate(8deg);
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.5);
+        }
+
+        .candy-button i {
+            color: white;
+            font-size: 1.5em;
+        }
+
+        .search-tips {
+            text-align: center;
+            color: var(--rose);
+            margin-top: 10px;
+            font-size: 0.9em;
+            opacity: 0.8;
+            animation: twinkle 2s infinite;
+        }
+
+        /* 卡片布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, var(--pink), transparent);
+            animation: shine 4s infinite;
+        }
+
+        .icon {
+            font-size: 2.5em;
+            color: var(--rose);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .icon {
+            transform: rotate(15deg);
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--rose);
+            font-weight: bold;
+            font-size: 1.2em;
+            display: block;
+            margin: 10px 0;
+        }
+
+        a:hover {
+            color: var(--purple);
+        }
+
+        /* 动画效果 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-50%) rotate(45deg); }
+            100% { transform: translateX(150%) rotate(45deg); }
+        }
+
+        @keyframes fa-beat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .fa-beat {
+            animation: fa-beat 1.5s ease infinite;
+        }
+
+        /* 装饰元素 */
+        .deco-cloud {
+            position: fixed;
+            opacity: 0.3;
+            animation: cloud 20s linear infinite;
+        }
+
+        @keyframes cloud {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100vw); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍬 蜜糖少女导航站 🌸</h1>
+        
+        <!-- 谷歌搜索框 -->
+        <div class="search-container">
+            <form action="https://www.google.com/search" method="GET" target="_blank" class="sweet-search">
+                <input type="text" 
+                       name="q" 
+                       placeholder="🦄 输入魔法咒语..." 
+                       class="unicorn-input"
+                       autocomplete="off">
+                <button type="submit" class="candy-button">
+                    <i class="fas fa-search fa-beat"></i>
+                </button>
+            </form>
+            <div class="search-tips">✨ 试试「猫咪表情包」或「草莓蛋糕食谱」</div>
+        </div>
+
+        <!-- 导航卡片 -->
+        <div class="grid">
+            <div class="card">
+                <i class="icon fas fa-heart"></i>
+                <h2>社交花园</h2>
+                <a href="#">📷 Instagram</a>
+                <a href="#">🦋 小红书</a>
+                <a href="#">💌 微博</a>
+            </div>
+
+            <div class="card">
+                <i class="icon fas fa-star"></i>
+                <h2>学习乐园</h2>
+                <a href="#">📚 在线课程</a>
+                <a href="#">✏️ 学习笔记</a>
+                <a href="#">🎨 创意工坊</a>
+            </div>
+
+            <div class="card">
+                <i class="icon fas fa-cookie"></i>
+                <h2>甜蜜时光</h2>
+                <a href="#">🍿 追剧频道</a>
+                <a href="#">🎵 音乐小屋</a>
+                <a href="#">🛍️ 购物街</a>
+            </div>
+
+            <div class="card">
+                <i class="icon fas fa-cloud"></i>
+                <h2>实用工具</h2>
+                <a href="#">📅 日程管理</a>
+                <a href="#">🌈 天气预告</a>
+                <a href="#">💡 生活小贴士</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 装饰云朵 -->
+    <div class="deco-cloud" style="top:20%; left:-10%; font-size:5em;">☁️</div>
+    <div class="deco-cloud" style="top:60%; left:-20%; font-size:3em; animation-delay:-5s">☁️</div>
+</body>
+</html>
