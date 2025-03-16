@@ -1,0 +1,33 @@
+   name: 自动部署网站
+
+   on:
+     push:
+       branches:
+         - blog  # 当blog分支有更新时触发
+
+   jobs:
+     deploy:
+       runs-on: ubuntu-latest
+       steps:
+         - name: 检出代码
+           uses: actions/checkout@v3
+           with:
+             ref: blog
+           
+         - name: 安装Python
+           uses: actions/setup-python@v3
+           with:
+             python-version: '3.10'
+             
+         - name: 安装Cato
+           run: pip install git+https://github.com/Jeffrey-done/cato-blog.git
+         
+         - name: 构建网站
+           run: cato build
+         
+         - name: 部署到master分支
+           uses: JamesIves/github-pages-deploy-action@v4
+           with:
+             branch: master
+             folder: public
+             clean: true
