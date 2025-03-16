@@ -7,10 +7,12 @@ import re
 import yaml
 import markdown
 from datetime import datetime
+import shutil
 
 # 配置
 MD_DIR = 'source/_posts'
 HTML_DIR = 'html_articles'
+RESOURCES_DIR = 'resources'  # 用于存储静态资源
 
 def parse_frontmatter(content):
     """解析Markdown文件的前置数据"""
@@ -40,21 +42,52 @@ def extract_template_from_master():
             if not os.path.exists(master_index):
                 raise FileNotFoundError("找不到主题模板文件")
         
+        # 复制CSS和其他资源文件
+        master_dir = os.path.dirname(master_index)
+        if not os.path.exists(RESOURCES_DIR):
+            os.makedirs(RESOURCES_DIR)
+            
+        # 复制css目录
+        css_dir = os.path.join(master_dir, 'css')
+        if os.path.exists(css_dir):
+            if not os.path.exists(os.path.join(RESOURCES_DIR, 'css')):
+                shutil.copytree(css_dir, os.path.join(RESOURCES_DIR, 'css'))
+                print(f"已复制CSS资源到{RESOURCES_DIR}/css")
+        
+        # 复制js目录
+        js_dir = os.path.join(master_dir, 'js')
+        if os.path.exists(js_dir):
+            if not os.path.exists(os.path.join(RESOURCES_DIR, 'js')):
+                shutil.copytree(js_dir, os.path.join(RESOURCES_DIR, 'js'))
+                print(f"已复制JS资源到{RESOURCES_DIR}/js")
+                
+        # 复制图片目录
+        for img_dir in ['images', 'img', 'assets']:
+            src_img_dir = os.path.join(master_dir, img_dir)
+            if os.path.exists(src_img_dir):
+                if not os.path.exists(os.path.join(RESOURCES_DIR, img_dir)):
+                    shutil.copytree(src_img_dir, os.path.join(RESOURCES_DIR, img_dir))
+                    print(f"已复制图片资源到{RESOURCES_DIR}/{img_dir}")
+        
         with open(master_index, 'r', encoding='utf-8') as f:
             content = f.read()
         
         # 提取head部分，包含所有CSS和meta标签
-        head_match = re.search(r'<head>.*?</head>', content, re.DOTALL)
+        head_match = re.search(r'<head.*?>.*?</head>', content, re.DOTALL)
         if not head_match:
             raise ValueError("无法在模板中找到head部分")
         
         head_content = head_match.group(0)
         
+        # 更新资源路径
+        head_content = re.sub(r'(href|src)="(?!http)(.*?)(\.css|\.js)"', r'\1="../\2\3"', head_content)
+        head_content = re.sub(r'(href|src)="(?!http)(images|img|assets)/(.*?)"', r'\1="../\2/\3"', head_content)
+        
         # 寻找在文章列表容器之前的内容作为header模板
         pre_content_parts = content.split('<div class="post-item">')
         if len(pre_content_parts) < 2:
             # 尝试其他可能的分隔点
-            for possible_marker in ['<div class="posts">', '<div class="articles">', '<main>', '<article>']:
+            for possible_marker in ['<div class="posts">', '<div class="articles">', '<main>', '<article>', '<div class="container">']:
                 if possible_marker in content:
                     pre_content_parts = content.split(possible_marker)
                     break
@@ -66,34 +99,122 @@ def extract_template_from_master():
         post_content_parts = content.split('</div>\n</div>')
         if len(post_content_parts) < 2:
             # 尝试其他可能的结束点
-            for possible_end in ['</main>', '</article>', '</body>']:
+            for possible_end in ['</main>', '</article>', '</body>', '</div>']:
                 if possible_end in content:
                     post_content_parts = content.split(possible_end)
                     if len(post_content_parts) > 1:
                         footer_template = possible_end + post_content_parts[1]
-                        return head_content, header_template, footer_template
-        
-        if len(post_content_parts) > 1:
+                        break
+            else:
+                footer_template = "</body></html>"
+        else:
             footer_template = post_content_parts[1]
-            return head_content, header_template, footer_template
         
-        # 如果无法提取，返回默认值
-        return head_content, "<body>", "</body>"
+        # 更新资源路径
+        header_template = re.sub(r'(href|src)="(?!http)(.*?)(\.css|\.js)"', r'\1="../\2\3"', header_template)
+        header_template = re.sub(r'(href|src)="(?!http)(images|img|assets)/(.*?)"', r'\1="../\2/\3"', header_template)
+        
+        footer_template = re.sub(r'(href|src)="(?!http)(.*?)(\.css|\.js)"', r'\1="../\2\3"', footer_template)
+        footer_template = re.sub(r'(href|src)="(?!http)(images|img|assets)/(.*?)"', r'\1="../\2/\3"', footer_template)
+        
+        print("成功提取主题模板")
+        return head_content, header_template, footer_template
         
     except Exception as e:
         print(f"提取模板失败: {e}")
-        # 返回一个简单的默认模板
+        # 返回一个简单但美观的默认模板
         return """<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #333; }
-        .post-preview { color: #666; }
-        a { color: #0066cc; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+            line-height: 1.6; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        h1 { 
+            color: #212529; 
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.5rem;
+        }
+        h2, h3, h4, h5, h6 {
+            color: #343a40;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .post-meta { 
+            color: #6c757d; 
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        .post-content { 
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 2rem;
+        }
+        .return-link { 
+            margin-top: 2rem;
+            text-align: center;
+        }
+        a { 
+            color: #007bff; 
+            text-decoration: none; 
+        }
+        a:hover { 
+            text-decoration: underline; 
+            color: #0056b3;
+        }
+        pre, code {
+            background-color: #f1f3f5;
+            border-radius: 3px;
+            padding: 0.2em 0.4em;
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        pre {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        pre code {
+            padding: 0;
+            background-color: transparent;
+        }
+        blockquote {
+            border-left: 4px solid #ced4da;
+            margin-left: 0;
+            padding-left: 1rem;
+            color: #6c757d;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1rem auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        th, td {
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #e9ecef;
+        }
     </style>
-</head>""", "<body>", "</body>"
+</head>""", """<body>
+    <div class="container">""", """    </div>
+</body>
+</html>"""
 
 def generate_articles():
     """生成文章HTML文件和文章列表"""
@@ -107,20 +228,95 @@ def generate_articles():
     # 尝试提取主题模板
     try:
         head_template, header_template, footer_template = extract_template_from_master()
-        print("成功提取主题模板")
     except Exception as e:
         print(f"无法提取主题模板: {e}, 使用默认模板")
         head_template = """<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #333; }
-        .post-meta { color: #666; margin-bottom: 20px; }
-        .post-content { margin-bottom: 30px; }
-        .return-link { margin-top: 30px; }
-        a { color: #0066cc; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+            line-height: 1.6; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        h1 { 
+            color: #212529; 
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.5rem;
+        }
+        h2, h3, h4, h5, h6 {
+            color: #343a40;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .post-meta { 
+            color: #6c757d; 
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        .post-content { 
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 2rem;
+        }
+        .return-link { 
+            margin-top: 2rem;
+            text-align: center;
+        }
+        a { 
+            color: #007bff; 
+            text-decoration: none; 
+        }
+        a:hover { 
+            text-decoration: underline; 
+            color: #0056b3;
+        }
+        pre, code {
+            background-color: #f1f3f5;
+            border-radius: 3px;
+            padding: 0.2em 0.4em;
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        pre {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        pre code {
+            padding: 0;
+            background-color: transparent;
+        }
+        blockquote {
+            border-left: 4px solid #ced4da;
+            margin-left: 0;
+            padding-left: 1rem;
+            color: #6c757d;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1rem auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        th, td {
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #e9ecef;
+        }
     </style>
 </head>"""
         header_template = """<body>
@@ -128,6 +324,11 @@ def generate_articles():
         footer_template = """    </div>
 </body>
 </html>"""
+    
+    # 确保资源目录存在
+    if not os.path.exists(os.path.join(HTML_DIR, 'resources')):
+        if os.path.exists(RESOURCES_DIR):
+            shutil.copytree(RESOURCES_DIR, os.path.join(HTML_DIR, 'resources'))
     
     articles = []
     
@@ -175,8 +376,10 @@ def generate_articles():
             
             # 生成带主题的文章HTML
             # 修改<head>中的标题
-            custom_head = head_template.replace('<title>', f'<title>{title} - ')
-            if '<title>' not in head_template:
+            custom_head = head_template
+            if '<title>' in custom_head:
+                custom_head = custom_head.replace('<title>', f'<title>{title} - ')
+            else:
                 custom_head = custom_head.replace('</head>', f'<title>{title}</title></head>')
             
             html = f"""<!DOCTYPE html>
