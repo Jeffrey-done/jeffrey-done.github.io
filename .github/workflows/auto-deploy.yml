@@ -1,9 +1,9 @@
-name: 自动部署网站
+name: 使用Cato自动部署
 
 on:
   push:
     branches:
-      - blog  # 当blog分支有更新时触发
+      - blog
 
 jobs:
   deploy:
@@ -19,17 +19,42 @@ jobs:
         with:
           python-version: '3.10'
           
-      - name: 克隆Cato仓库
+      - name: 调试Cato结构
         run: |
-          git clone https://github.com/Jeffrey-done/cato-blog.git /tmp/cato-blog
-          cd /tmp/cato-blog
-          pip install -e .
+          # 查看目录结构，帮助诊断
+          ls -la
+          find . -name "*.py" | grep -i cato
           
-      - name: 构建网站
+      - name: 安装依赖
         run: |
-          cd $GITHUB_WORKSPACE
-          python -m cato.cli build
-
+          python -m pip install --upgrade pip
+          # 安装常见依赖
+          pip install markdown jinja2 pyyaml watchdog
+          
+      - name: 直接运行Cato构建脚本
+        run: |
+          # 尝试找到并直接运行构建脚本
+          if [ -f "cato/cato/core.py" ]; then
+            echo "找到 cato/cato/core.py"
+            python -c "from cato.cato.core import BlogBuilder; builder = BlogBuilder('config.yml'); builder.build()"
+          elif [ -f "cato/core.py" ]; then
+            echo "找到 cato/core.py"
+            python -c "from cato.core import BlogBuilder; builder = BlogBuilder('config.yml'); builder.build()"
+          else
+            echo "查找构建脚本..."
+            CORE_FILE=$(find . -name "core.py" | grep -i cato | head -1)
+            if [ -n "$CORE_FILE" ]; then
+              echo "找到核心文件: $CORE_FILE"
+              DIR=$(dirname "$CORE_FILE")
+              MODULE=$(echo "$DIR" | sed 's/\.\///g' | sed 's/\//./g')
+              echo "使用模块: $MODULE"
+              python -c "import sys; sys.path.append('.'); from $MODULE import BlogBuilder; builder = BlogBuilder('config.yml'); builder.build()"
+            else
+              echo "无法找到Cato构建脚本"
+              exit 1
+            fi
+          fi
+          
       - name: 部署到master分支
         uses: JamesIves/github-pages-deploy-action@v4
         with:
