@@ -117,11 +117,19 @@ def create_rss(articles_dir, site_url, output_path, site_title="我的博客", s
         
         # 添加完整内容（使用CDATA确保HTML标签不被解析）
         content_encoded = ET.SubElement(item, "content:encoded")
-        content_encoded.text = f"<![CDATA[{article['content']}]]>"
+        # 使用纯文本方式设置CDATA内容，避免XML解析问题
+        content_encoded.text = article['content']
     
     # 创建并格式化XML
     rough_string = ET.tostring(rss, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
+    # 将CDATA标记添加到生成的XML中
+    xml_str = rough_string.decode('utf-8')
+    # 替换内容标签为带CDATA的版本
+    xml_str = xml_str.replace('<content:encoded>', '<content:encoded><![CDATA[')
+    xml_str = xml_str.replace('</content:encoded>', ']]></content:encoded>')
+    
+    # 解析修改后的XML并格式化
+    reparsed = minidom.parseString(xml_str)
     pretty_xml = reparsed.toprettyxml(indent="  ")
     
     # 保存RSS文件
