@@ -393,6 +393,10 @@ def generate_articles():
             # 转换为HTML前清理Markdown源码中的元数据
             content = clean_metadata_from_content(content)
             
+            # 尝试从内容中提取标题行
+            title_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+            content_title = title_match.group(1).strip() if title_match else None
+            
             # 移除Markdown源码中的HTML标签
             content = re.sub(r'<[^>]+>', '', content)
             
@@ -431,17 +435,19 @@ def generate_articles():
             # 获取文章信息 - 优先使用frontmatter中的标题
             title = None
             
-            # 1. 首先尝试从frontmatter中获取标题
+            # 优先级：1. frontmatter标题 2. 内容中的标题 3. 文件名
             if frontmatter and 'title' in frontmatter and frontmatter['title']:
                 title = frontmatter['title']
-            
-            # 2. 如果frontmatter中没有标题，尝试使用第一个Markdown标题作为标题
-            if not title and backup_title:
+                print(f"使用frontmatter标题: {title}")
+            elif content_title:
+                title = content_title
+                print(f"使用内容中的标题: {title}")
+            elif backup_title:
                 title = backup_title
-            
-            # 3. 如果以上都不存在，才使用文件名
-            if not title:
+                print(f"使用备用标题: {title}")
+            else:
                 title = filename.replace('.md', '')
+                print(f"使用文件名作为标题: {title}")
             
             # 获取日期信息
             date_str = frontmatter.get('date', datetime.now().strftime('%Y-%m-%d'))
@@ -457,6 +463,9 @@ def generate_articles():
                 date_formatted = str(date_str)
                 date_obj = datetime.now()  # 默认值用于排序
             
+            # 确保标题是字符串
+            title = str(title) if title else filename.replace('.md', '')
+            
             # 添加到文章列表
             articles.append({
                 'title': title,
@@ -465,6 +474,9 @@ def generate_articles():
                 'filename': filename.replace('.md', '.html'),
                 'content': html_content
             })
+            
+            # 调试信息
+            print(f"文章标题: {title}, 文件名: {filename}")
             
             # 生成带主题的文章HTML
             # 修改<head>中的标题
@@ -501,6 +513,11 @@ def generate_articles():
     # 按日期排序文章
     articles.sort(key=lambda x: x['date_obj'], reverse=True)
     
+    # 输出所有文章标题用于调试
+    print("\n所有文章标题:")
+    for article in articles:
+        print(f"- {article['title']} (文件: {article['filename']})")
+    
     # 生成文章列表HTML片段
     article_list_html = ""
     for article in articles:
@@ -515,10 +532,13 @@ def generate_articles():
         # 截取预览文本
         preview_text = raw_content[:150] + '...' if len(raw_content) > 150 else raw_content
         
+        # 确保标题是字符串
+        title = str(article['title']) if article['title'] else article['filename'].replace('.html', '')
+        
         # 使用更简洁的HTML格式，只显示标题和预览内容
         article_list_html += f"""
 <div class="post-item">
-    <h2 class="post-title"><a href="posts/{article['filename']}">{article['title']}</a></h2>
+    <h2 class="post-title"><a href="posts/{article['filename']}">{title}</a></h2>
     <div class="post-preview">{preview_text}</div>
 </div>
 """
