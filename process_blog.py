@@ -14,6 +14,27 @@ MD_DIR = 'source/_posts'
 HTML_DIR = 'html_articles'
 RESOURCES_DIR = 'resources'  # 用于存储静态资源
 
+def clean_metadata_from_content(content):
+    """清理内容中可能存在的元数据字符串"""
+    # 移除常见的前置元数据格式
+    patterns = [
+        r'title:\s+[^\s]+ date:\s+"[^"]+" tags:\s+\[[^\]]*\] author:\s*',
+        r'title:\s+[^\s]+ date:\s+"[^"]+" tags:\s+\[[^\]]*\]',
+        r'date:\s+"[^"]+" tags:\s+\[[^\]]*\] author:\s*',
+        r'title:\s+[^\s]+ date:\s+"[^"]+"',
+        r'title:\s+[^\s]+ tags:\s+\[[^\]]*\]',
+        r'<p>title:.+?</p>',
+        r'<p>date:.+?</p>',
+        r'<p>tags:.+?</p>',
+        r'<p>author:.+?</p>'
+    ]
+    
+    cleaned_content = content
+    for pattern in patterns:
+        cleaned_content = re.sub(pattern, '', cleaned_content, flags=re.IGNORECASE)
+    
+    return cleaned_content
+
 def parse_frontmatter(content):
     """解析Markdown文件的前置数据"""
     pattern = r'^---\n(.*?)\n---\n(.*)'
@@ -26,6 +47,9 @@ def parse_frontmatter(content):
             return frontmatter, content
         except Exception as e:
             print(f"解析前置数据错误: {e}")
+    
+    # 如果没有找到前置元数据，检查并移除可能直接写在内容开头的元数据
+    content = clean_metadata_from_content(content)
     return {}, content
 
 def extract_template_from_master():
@@ -347,8 +371,14 @@ def generate_articles():
             # 解析前置数据
             frontmatter, content = parse_frontmatter(md_content)
             
+            # 确保内容中没有元数据字符串
+            content = clean_metadata_from_content(content)
+            
             # 转换为HTML
             html_content = markdown.markdown(content, extensions=['tables', 'fenced_code'])
+            
+            # 再次清理可能残留在内容中的元数据文本
+            html_content = clean_metadata_from_content(html_content)
             
             # 获取文章信息
             title = frontmatter.get('title', filename.replace('.md', ''))
