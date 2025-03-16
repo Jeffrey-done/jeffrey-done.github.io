@@ -115,10 +115,16 @@ def generate_articles():
     # 生成文章列表HTML片段
     article_list_html = ""
     for article in articles:
+        # 生成文章预览内容
+        preview_text = re.sub(r'<[^>]+>', '', article['content'])
+        preview_text = preview_text[:150] + '...' if len(preview_text) > 150 else preview_text
+        
+        # 修改HTML片段格式，只显示标题和预览，不显示日期
         article_list_html += f"""
 <div class="post-item">
-    <h2><a href="posts/{article['filename']}">{article['title']}</a></h2>
-    <div class="post-date">{article['date']}</div>
+    <h2 class="post-title"><a href="posts/{article['filename']}">{article['title']}</a></h2>
+    <div class="post-meta" style="display:none;">{article['date']}</div>
+    <div class="post-preview">{preview_text}</div>
 </div>
 """
     
