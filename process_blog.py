@@ -135,6 +135,9 @@ def extract_template_from_master():
         # 分割后的第一部分作为header模板（但需要去掉head部分，因为我们单独处理它）
         header_template = pre_content_parts[0].replace(head_match.group(0), '')
         
+        # 移除导航栏（顶部的"返回首页"、"标签"、"RSS"链接）
+        header_template = re.sub(r'<nav\s+class=["\'](nav|navbar)["\'][^>]*>.*?</nav>', '', header_template, flags=re.DOTALL)
+        
         # 寻找在文章列表容器之后的内容作为footer模板
         post_content_parts = content.split('</div>\n</div>')
         if len(post_content_parts) < 2:
