@@ -5,14 +5,23 @@ on:
     branches:
       - blog
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 检出代码
+      - name: 检出blog分支
         uses: actions/checkout@v3
         with:
           ref: blog
+          
+      - name: 检出master分支
+        uses: actions/checkout@v3
+        with:
+          ref: master
+          path: master-current
           
       - name: 安装Python
         uses: actions/setup-python@v3
@@ -24,13 +33,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install markdown jinja2 pyyaml
           
-      - name: 使用独立构建脚本
+      - name: 生成新文章
         run: |
           python build.py
+          
+      - name: 只复制新文章到当前master网站
+        run: |
+          # 只复制posts目录中的新文章到master分支
+          cp -r public/posts/* master-current/posts/
+          # 更新首页文章列表
+          cp public/index.html master-current/index.html
           
       - name: 部署到master分支
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: master
-          folder: public
-          clean: true
+          folder: master-current
+          clean: false  # 不清理未改变的文件
