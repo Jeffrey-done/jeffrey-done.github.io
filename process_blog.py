@@ -250,6 +250,42 @@ def extract_template_from_master():
         th {
             background-color: #e9ecef;
         }
+        /* 导航样式 */
+        .navigation {
+            display: flex;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .navigation a {
+            margin-right: 20px;
+            color: #6c757d;
+            text-decoration: none;
+        }
+        .navigation a:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+        /* 标签样式 */
+        .tags {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+        }
+        .tags a {
+            display: inline-block;
+            background-color: #e9ecef;
+            padding: 2px 8px;
+            margin-right: 5px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+        .tags a:hover {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>""", """<body>
     <div class="container">""", """    </div>
@@ -367,6 +403,42 @@ def generate_articles():
         th {
             background-color: #e9ecef;
         }
+        /* 导航样式 */
+        .navigation {
+            display: flex;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .navigation a {
+            margin-right: 20px;
+            color: #6c757d;
+            text-decoration: none;
+        }
+        .navigation a:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+        /* 标签样式 */
+        .tags {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+        }
+        .tags a {
+            display: inline-block;
+            background-color: #e9ecef;
+            padding: 2px 8px;
+            margin-right: 5px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+        .tags a:hover {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>"""
         header_template = """<body>
@@ -480,23 +552,6 @@ def generate_articles():
             # 确保标题是字符串
             title = str(title) if title else filename.replace('.md', '')
             
-            # 获取文章标签
-            tags = frontmatter.get('tags', [])
-            if isinstance(tags, str):
-                # 处理可能的标签格式 "[tag1, tag2]"
-                tags = tags.strip('[]').split(',')
-                tags = [tag.strip() for tag in tags]
-            
-            # 生成标签HTML
-            tags_html = ""
-            if tags:
-                tags_html = '<div class="post-tags">标签：'
-                for tag in tags:
-                    tag = tag.strip()
-                    if tag:
-                        tags_html += f'<a href="../index.html?tag={tag}" class="tag">{tag}</a> '
-                tags_html += '</div>'
-            
             # 添加到文章列表
             articles.append({
                 'title': title,
@@ -517,52 +572,26 @@ def generate_articles():
             else:
                 custom_head = custom_head.replace('</head>', f'<title>{title}</title></head>')
             
-            # 添加自定义样式
-            custom_head = custom_head.replace('</head>', '''
-    <style>
-        .top-nav {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            padding: 10px 0;
-        }
-        .top-nav a {
-            text-decoration: none;
-            color: #666;
-        }
-        .top-nav a:hover {
-            color: #333;
-        }
-        .post-tags {
-            margin-top: 30px;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-            font-size: 0.9em;
-            color: #666;
-        }
-        .tag {
-            display: inline-block;
-            background: #f0f0f0;
-            padding: 2px 8px;
-            margin: 0 5px;
-            border-radius: 3px;
-            font-size: 0.9em;
-            color: #666;
-            text-decoration: none;
-        }
-        .tag:hover {
-            background: #e0e0e0;
-        }
-    </style>
-</head>''')
+            # 获取标签信息
+            tags = frontmatter.get('tags', [])
+            if isinstance(tags, str):
+                tags = [tag.strip() for tag in tags.split(',')]
+            
+            # 构建标签HTML
+            tags_html = ""
+            if tags:
+                tags_html = '<div class="tags">标签：'
+                for tag in tags:
+                    tags_html += f'<a href="../index.html?tag={tag}">{tag}</a> '
+                tags_html += '</div>'
             
             html = f"""<!DOCTYPE html>
 <html>
 {custom_head}
 {header_template}
-    <div class="top-nav">
+    <div class="navigation">
         <a href="../index.html">← 返回首页</a>
-        <a href="../index.html?tag=all">标签</a>
+        <a href="../index.html?tags">标签</a>
         <a href="../rss.xml">RSS</a>
     </div>
     <article class="post">
@@ -572,6 +601,9 @@ def generate_articles():
             {html_content}
         </div>
         {tags_html}
+        <div class="return-link">
+            <a href="../index.html">返回首页</a>
+        </div>
     </article>
 {footer_template}"""
             
