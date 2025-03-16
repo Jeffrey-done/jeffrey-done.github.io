@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动更新和部署 - 我的博客</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav">
+            <a href="/">&larr; 返回首页</a>
+            <a href="/tags.html">标签</a>
+            <a href="/feed.xml">RSS</a>
+        </nav>
+
+        <article class="article">
+            <h1 class="article-title">自动更新和部署</h1>
+            <div class="article-meta">
+                2025-03-16
+                
+                · 博主
+                
+            </div>
+
+            <div class="article-content">
+                <h3 id="windows-hexo">使用 Windows 批处理脚本自动化 Hexo 部署</h3>
+<p>管理和部署 Hexo 博客可能会很重复。为了提高效率，我们准备了三个批处理脚本来自动化 Hexo 部署，创建定时任务，并管理这些任务。本文将解释这些脚本的用途和使用方法。</p>
+<h4 id="1-hexo_auto_upload_to_githubbat"><strong>1. Hexo_Auto_Upload_To_GitHub.bat</strong></h4>
+<p>这个脚本会执行必要的 Hexo 命令，将您的博客更新部署到 GitHub。它会打开 Git Bash，定位到 Hexo 项目目录，并依次执行以下命令：<br />
+- <code>hexo clean</code><br />
+- <code>hexo generate</code><br />
+- <code>hexo deploy</code>  </p>
+<p><strong>使用方法</strong>：<br />
+- 将脚本放在您的 Hexo 博客同一目录下。<br />
+- 双击执行部署过程。  </p>
+<p><strong>目的</strong>：<br />
+简化手动执行 Hexo 命令的过程，确保您的博客能够自动更新到 GitHub 上，而不会出错。</p>
+<hr />
+<h4 id="2-setup_hexo_auto_uploadbat"><strong>2. Setup_Hexo_Auto_Upload.bat</strong></h4>
+<p>这个脚本自动创建一个定时任务，在 Windows 中定期运行 <code>Hexo_Auto_Upload_To_GitHub.bat</code>。定时任务确保每两小时自动将您的博客更新部署到 GitHub，而不需要手动干预。</p>
+<p><strong>特点</strong>：<br />
+- 在执行之前检查管理员权限。<br />
+- 在 Windows 任务计划程序中创建一个重复任务。<br />
+- 配置任务每隔两小时运行一次。  </p>
+<p><strong>使用方法</strong>：<br />
+1. 将此脚本与 <code>Hexo_Auto_Upload_To_GitHub.bat</code> 保存在同一文件夹中。<br />
+2. 右键点击并选择 <strong>以管理员身份运行</strong>。  </p>
+<p><strong>目的</strong>：<br />
+通过定期运行部署脚本，自动保持您的博客更新。</p>
+<hr />
+<h4 id="3-remove_hexo_auto_uploadbat"><strong>3. Remove_Hexo_Auto_Upload.bat</strong></h4>
+<p>如果您不再需要自动部署功能，此脚本可以删除 <code>Setup_Hexo_Auto_Upload.bat</code> 创建的定时任务。</p>
+<p><strong>特点</strong>：<br />
+- 删除 Windows 任务计划程序中的特定任务。<br />
+- 确保不会留下任何残留的任务。</p>
+<p><strong>使用方法</strong>：<br />
+1. 将此脚本保存在任意位置。<br />
+2. 右键点击并选择 <strong>以管理员身份运行</strong>。  </p>
+<p><strong>目的</strong>：<br />
+帮助管理并禁用自动部署设置，如果不再需要，可以停止该功能。</p>
+<hr />
+<h3 id="_1">下载文件</h3>
+<p>您可以通过以下链接下载所有三个脚本：<br />
+- <a href="https://unlove.lanzouv.com/iHdWn2g1nnub">Hexo_Auto_Upload_To_GitHub.bat</a><br />
+- <a href="https://unlove.lanzouv.com/i7VQI2g1nnvc">Setup_Hexo_Auto_Upload.bat</a><br />
+- <a href="https://unlove.lanzouv.com/iozL82g1nnwd">Remove_Hexo_Auto_Upload.bat</a>  </p>
+<hr />
+<h3 id="_2">使用方法</h3>
+<ol>
+<li><strong>准备工作</strong>：  </li>
+<li>确保已安装 Hexo 并且您的项目已配置为 GitHub 部署。  </li>
+<li>
+<p>将 <code>Hexo_Auto_Upload_To_GitHub.bat</code> 放置在您的 Hexo 博客目录中。  </p>
+</li>
+<li>
+<p><strong>设置自动部署</strong>：  </p>
+</li>
+<li>
+<p>右键点击并以管理员身份运行 <code>Setup_Hexo_Auto_Upload.bat</code>，以每两小时为间隔创建定时任务，自动执行更新。  </p>
+</li>
+<li>
+<p><strong>禁用自动部署</strong>：  </p>
+</li>
+<li>如果您希望停止自动化操作，请右键点击并以管理员身份运行 <code>Remove_Hexo_Auto_Upload.bat</code>，删除定时任务。  </li>
+</ol>
+<hr />
+<h3 id="_3">总结</h3>
+<p>这些脚本通过自动化 Hexo 部署和简化任务管理，节省了时间和精力。无论您是正在积极开发还是维护博客，这一设置都能确保您的博客定期更新，减少手动操作。</p>
+<blockquote>
+<p><strong>小贴士</strong>：如果您希望调整部署的间隔，可以在 <code>Setup_Hexo_Auto_Upload.bat</code> 中修改任务频率。  </p>
+</blockquote>
+<p>如果有任何问题或需要定制，欢迎随时联系我！ 😊</p>
+            </div>
+
+            
+            <div class="article-tags">
+                标签：
+                
+                <a href="/tags/自编文件.html" class="tag">自编文件</a>
+                
+            </div>
+            
+        </article>
+
+        <footer class="footer">
+            <p>&copy; 2025 我的博客. Powered by Cato.</p>
+        </footer>
+    </div>
+</body>
+</html>
