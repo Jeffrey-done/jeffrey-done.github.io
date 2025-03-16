@@ -396,6 +396,10 @@ def generate_articles():
             # 移除Markdown源码中的HTML标签
             content = re.sub(r'<[^>]+>', '', content)
             
+            # 分析文件内容，尝试提取第一个标题作为备用标题
+            first_heading_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+            backup_title = first_heading_match.group(1).strip() if first_heading_match else None
+            
             # 转换为HTML
             html_content = markdown.markdown(content, extensions=['tables', 'fenced_code'])
             
@@ -424,8 +428,22 @@ def generate_articles():
             
             html_content = '\n'.join(clean_lines)
             
-            # 获取文章信息 - 确保使用frontmatter中的title，如果不存在才使用文件名
-            title = frontmatter.get('title', filename.replace('.md', ''))
+            # 获取文章信息 - 优先使用frontmatter中的标题
+            title = None
+            
+            # 1. 首先尝试从frontmatter中获取标题
+            if frontmatter and 'title' in frontmatter and frontmatter['title']:
+                title = frontmatter['title']
+            
+            # 2. 如果frontmatter中没有标题，尝试使用第一个Markdown标题作为标题
+            if not title and backup_title:
+                title = backup_title
+            
+            # 3. 如果以上都不存在，才使用文件名
+            if not title:
+                title = filename.replace('.md', '')
+            
+            # 获取日期信息
             date_str = frontmatter.get('date', datetime.now().strftime('%Y-%m-%d'))
             
             # 尝试解析日期以便排序
