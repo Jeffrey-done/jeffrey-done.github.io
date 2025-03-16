@@ -50,17 +50,12 @@ jobs:
           # 更新文章预览的CSS样式
           python update_styles.py master-website/index.html
           
-          # 生成RSS文件
-          SITE_URL=$(echo "https://${{ github.repository_owner }}.github.io")
-          python create_rss.py html_articles $SITE_URL master-website/rss.xml "博客" "最新文章RSS订阅"
-          
       - name: 提交到master分支
         run: |
           cd master-website
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
-          # 使用 -f 强制添加可能被忽略的文件
-          git add -f posts/ index.html rss.xml
+          git add posts/ index.html
           
           if git diff --staged --quiet; then
             echo "没有变更需要提交"
