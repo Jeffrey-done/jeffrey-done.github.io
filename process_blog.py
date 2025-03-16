@@ -138,6 +138,9 @@ def extract_template_from_master():
         # 移除导航栏（顶部的"返回首页"、"标签"、"RSS"链接）
         header_template = re.sub(r'<nav\s+class=["\'](nav|navbar)["\'][^>]*>.*?</nav>', '', header_template, flags=re.DOTALL)
         
+        # 移除标签云部分
+        header_template = re.sub(r'<div\s+class=["\'](tag-list)["\'][^>]*>.*?</div>', '', header_template, flags=re.DOTALL)
+        
         # 寻找在文章列表容器之后的内容作为footer模板
         post_content_parts = content.split('</div>\n</div>')
         if len(post_content_parts) < 2:
