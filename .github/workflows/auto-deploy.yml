@@ -47,6 +47,9 @@ jobs:
           cp master-website/index.html master-website/index.html.backup
           python update_index.py master-website/index.html html_articles/article_list.html master-website/index.html
           
+          # 更新文章预览的CSS样式
+          python update_styles.py master-website/index.html
+          
       - name: 提交到master分支
         run: |
           cd master-website
