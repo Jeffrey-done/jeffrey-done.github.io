@@ -119,11 +119,10 @@ def generate_articles():
         preview_text = re.sub(r'<[^>]+>', '', article['content'])
         preview_text = preview_text[:150] + '...' if len(preview_text) > 150 else preview_text
         
-        # 修改HTML片段格式，只显示标题和预览，不显示日期
+        # 使用更简洁的HTML格式，只显示标题和预览内容
         article_list_html += f"""
 <div class="post-item">
     <h2 class="post-title"><a href="posts/{article['filename']}">{article['title']}</a></h2>
-    <div class="post-meta" style="display:none;">{article['date']}</div>
     <div class="post-preview">{preview_text}</div>
 </div>
 """
@@ -138,4 +137,4 @@ def generate_articles():
 if __name__ == "__main__":
     print("开始处理博客文章...")
     generate_articles()
-    print("处理完成！")
+    print("处理完成！") 
