@@ -11,6 +11,7 @@ def update_index_page(original_index_path, article_list_path, output_path):
     智能更新首页
     - 保持原始的HTML结构和样式
     - 只更新文章列表部分
+    - 添加标签导航和RSS链接
     """
     # 读取原始首页
     with open(original_index_path, 'r', encoding='utf-8') as f:
@@ -22,6 +23,71 @@ def update_index_page(original_index_path, article_list_path, output_path):
     
     # 解析原始HTML
     soup = BeautifulSoup(original_html, 'html.parser')
+    
+    # 检查页面是否已经有导航栏
+    has_nav = False
+    nav_section = soup.find(class_="top-nav")
+    if not nav_section:
+        nav_section = soup.find("nav")
+        if not nav_section or not (
+            "返回首页" in nav_section.text or 
+            "标签" in nav_section.text or 
+            "RSS" in nav_section.text
+        ):
+            has_nav = False
+        else:
+            has_nav = True
+    else:
+        has_nav = True
+    
+    # 如果没有导航栏，添加一个
+    if not has_nav:
+        # 添加导航栏样式到head
+        head = soup.find('head')
+        if head:
+            style_tag = soup.new_tag('style')
+            style_tag.string = """
+            .top-nav {
+                display: flex;
+                gap: 20px;
+                margin-bottom: 20px;
+                padding: 10px 0;
+            }
+            .top-nav a {
+                text-decoration: none;
+                color: #666;
+            }
+            .top-nav a:hover {
+                color: #333;
+            }
+            """
+            head.append(style_tag)
+        
+        # 创建导航栏
+        nav_div = soup.new_tag('div')
+        nav_div['class'] = 'top-nav'
+        
+        # 添加导航链接
+        home_link = soup.new_tag('a')
+        home_link['href'] = '#'
+        home_link.string = '首页'
+        
+        tags_link = soup.new_tag('a')
+        tags_link['href'] = 'index.html?tag=all'
+        tags_link.string = '标签'
+        
+        rss_link = soup.new_tag('a')
+        rss_link['href'] = 'rss.xml'
+        rss_link.string = 'RSS'
+        
+        nav_div.append(home_link)
+        nav_div.append(tags_link)
+        nav_div.append(rss_link)
+        
+        # 在body的开始处添加导航栏
+        body = soup.find('body')
+        if body and body.contents:
+            body.insert(0, nav_div)
     
     # 尝试找到文章列表容器
     # 常见的文章列表容器类名
