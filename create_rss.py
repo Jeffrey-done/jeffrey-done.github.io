@@ -37,8 +37,12 @@ def create_rss(articles_dir, site_url, output_path, site_title="我的博客", s
         site_title: 网站标题
         site_description: 网站描述
     """
-    # 创建RSS根元素
-    rss = ET.Element("rss", version="2.0")
+    # 创建RSS根元素，添加必要的命名空间
+    rss = ET.Element("rss", {
+        "version": "2.0",
+        "xmlns:content": "http://purl.org/rss/1.0/modules/content/",
+        "xmlns:atom": "http://www.w3.org/2005/Atom"
+    })
     channel = ET.SubElement(rss, "channel")
     
     # 添加频道信息
