@@ -1,4 +1,4 @@
-name: 博客自动部署
+name: 智能更新博客
 
 on:
   push:
@@ -9,19 +9,13 @@ permissions:
   contents: write
 
 jobs:
-  deploy:
+  update-blog:
     runs-on: ubuntu-latest
     steps:
       - name: 检出blog分支
         uses: actions/checkout@v3
         with:
           ref: blog
-          
-      - name: 检出master分支
-        uses: actions/checkout@v3
-        with:
-          ref: master
-          path: master-current
           
       - name: 安装Python
         uses: actions/setup-python@v3
@@ -31,22 +25,39 @@ jobs:
       - name: 安装依赖
         run: |
           python -m pip install --upgrade pip
-          pip install markdown jinja2 pyyaml
+          pip install markdown pyyaml beautifulsoup4
           
-      - name: 生成新文章
+      - name: 生成文章
         run: |
-          python build.py
+          python process_blog.py
           
-      - name: 只复制新文章到当前master网站
-        run: |
-          # 只复制posts目录中的新文章到master分支
-          cp -r public/posts/* master-current/posts/
-          # 更新首页文章列表
-          cp public/index.html master-current/index.html
-          
-      - name: 部署到master分支
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: 检出master分支
+        uses: actions/checkout@v3
         with:
-          branch: master
-          folder: master-current
-          clean: false  # 不清理未改变的文件
+          ref: master
+          path: master-website
+          
+      - name: 智能更新网站
+        run: |
+          # 复制新文章到posts目录
+          mkdir -p master-website/posts
+          cp -n html_articles/*.html master-website/posts/ || echo "没有新文章"
+          
+          # 智能更新首页
+          cp master-website/index.html master-website/index.html.backup
+          python update_index.py master-website/index.html html_articles/article_list.html master-website/index.html
+          
+      - name: 提交到master分支
+        run: |
+          cd master-website
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git add posts/ index.html
+          
+          if git diff --staged --quiet; then
+            echo "没有变更需要提交"
+          else
+            git commit -m "更新博客 [自动部署]"
+            git push
+            echo "已更新博客内容"
+          fi
