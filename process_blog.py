@@ -256,6 +256,16 @@ def extract_template_from_master():
 </body>
 </html>"""
 
+def clean_title(title):
+    """清理标题，去除日期前缀"""
+    # 移除常见的日期前缀格式（如2025-03-16-）
+    title = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', title)
+    # 移除文件名中的日期格式
+    title = re.sub(r'^date-\d{4}-\d{2}-\d{2}[-_]', '', title)
+    # 移除其他可能的日期格式
+    title = re.sub(r'^\d{4}_\d{2}_\d{2}[-_]', '', title)
+    return title
+
 def generate_articles():
     """生成文章HTML文件和文章列表"""
     if not os.path.exists(HTML_DIR):
@@ -446,8 +456,12 @@ def generate_articles():
                 title = backup_title
                 print(f"使用备用标题: {title}")
             else:
-                title = filename.replace('.md', '')
+                # 从文件名获取标题，并去除日期前缀
+                title = clean_title(filename.replace('.md', ''))
                 print(f"使用文件名作为标题: {title}")
+            
+            # 清理最终标题，确保移除任何日期前缀
+            title = clean_title(str(title))
             
             # 获取日期信息
             date_str = frontmatter.get('date', datetime.now().strftime('%Y-%m-%d'))
@@ -532,8 +546,8 @@ def generate_articles():
         # 截取预览文本
         preview_text = raw_content[:150] + '...' if len(raw_content) > 150 else raw_content
         
-        # 确保标题是字符串
-        title = str(article['title']) if article['title'] else article['filename'].replace('.html', '')
+        # 确保标题是字符串并清理日期前缀
+        title = clean_title(str(article['title']) if article['title'] else article['filename'].replace('.html', ''))
         
         # 使用更简洁的HTML格式，只显示标题和预览内容
         article_list_html += f"""
