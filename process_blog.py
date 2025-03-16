@@ -486,12 +486,6 @@ def generate_articles():
                 # 处理可能的标签格式 "[tag1, tag2]"
                 tags = tags.strip('[]').split(',')
                 tags = [tag.strip() for tag in tags]
-            elif not isinstance(tags, list):
-                tags = []
-            
-            # 确保至少有一个默认标签
-            if not tags:
-                tags = ['随笔']
             
             # 生成标签HTML
             tags_html = ""
@@ -614,27 +608,10 @@ def generate_articles():
         # 确保标题是字符串并清理日期前缀
         title = clean_title(str(article['title']) if article['title'] else article['filename'].replace('.html', ''))
         
-        # 获取文章标签用于筛选
-        article_tags = article.get('tags', ['随笔'])
-        if isinstance(article_tags, str):
-            article_tags = article_tags.strip('[]').split(',')
-            article_tags = [tag.strip() for tag in article_tags]
-        elif not isinstance(article_tags, list):
-            article_tags = ['随笔']
-        
-        # 生成标签HTML
-        tags_html = '<div class="post-tags">标签: '
-        for tag in article_tags:
-            tag = tag.strip()
-            if tag:
-                tags_html += f'<a href="index.html?tag={tag}">{tag}</a> '
-        tags_html += '</div>'
-        
         # 使用更简洁的HTML格式，只显示标题和预览内容
         article_list_html += f"""
-<div class="post-item" data-tags="{','.join(article_tags)}">
+<div class="post-item">
     <h2 class="post-title"><a href="posts/{article['filename']}">{title}</a></h2>
-    {tags_html}
     <div class="post-preview">{preview_text}</div>
 </div>
 """
