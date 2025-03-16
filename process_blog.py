@@ -26,6 +26,75 @@ def parse_frontmatter(content):
             print(f"解析前置数据错误: {e}")
     return {}, content
 
+def extract_template_from_master():
+    """
+    尝试从master分支的index.html提取头部和尾部模板
+    如果master分支不存在，返回简单的默认模板
+    """
+    try:
+        # 如果在自动部署中，master分支内容位于这个路径
+        master_index = 'master-website/index.html'
+        if not os.path.exists(master_index):
+            # 检查本地的情况
+            master_index = '../master/index.html'
+            if not os.path.exists(master_index):
+                raise FileNotFoundError("找不到主题模板文件")
+        
+        with open(master_index, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # 提取head部分，包含所有CSS和meta标签
+        head_match = re.search(r'<head>.*?</head>', content, re.DOTALL)
+        if not head_match:
+            raise ValueError("无法在模板中找到head部分")
+        
+        head_content = head_match.group(0)
+        
+        # 寻找在文章列表容器之前的内容作为header模板
+        pre_content_parts = content.split('<div class="post-item">')
+        if len(pre_content_parts) < 2:
+            # 尝试其他可能的分隔点
+            for possible_marker in ['<div class="posts">', '<div class="articles">', '<main>', '<article>']:
+                if possible_marker in content:
+                    pre_content_parts = content.split(possible_marker)
+                    break
+        
+        # 分割后的第一部分作为header模板（但需要去掉head部分，因为我们单独处理它）
+        header_template = pre_content_parts[0].replace(head_match.group(0), '')
+        
+        # 寻找在文章列表容器之后的内容作为footer模板
+        post_content_parts = content.split('</div>\n</div>')
+        if len(post_content_parts) < 2:
+            # 尝试其他可能的结束点
+            for possible_end in ['</main>', '</article>', '</body>']:
+                if possible_end in content:
+                    post_content_parts = content.split(possible_end)
+                    if len(post_content_parts) > 1:
+                        footer_template = possible_end + post_content_parts[1]
+                        return head_content, header_template, footer_template
+        
+        if len(post_content_parts) > 1:
+            footer_template = post_content_parts[1]
+            return head_content, header_template, footer_template
+        
+        # 如果无法提取，返回默认值
+        return head_content, "<body>", "</body>"
+        
+    except Exception as e:
+        print(f"提取模板失败: {e}")
+        # 返回一个简单的默认模板
+        return """<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        .post-preview { color: #666; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>""", "<body>", "</body>"
+
 def generate_articles():
     """生成文章HTML文件和文章列表"""
     if not os.path.exists(HTML_DIR):
@@ -34,6 +103,31 @@ def generate_articles():
     if not os.path.exists(MD_DIR):
         print(f"文章目录不存在: {MD_DIR}")
         return []
+    
+    # 尝试提取主题模板
+    try:
+        head_template, header_template, footer_template = extract_template_from_master()
+        print("成功提取主题模板")
+    except Exception as e:
+        print(f"无法提取主题模板: {e}, 使用默认模板")
+        head_template = """<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        .post-meta { color: #666; margin-bottom: 20px; }
+        .post-content { margin-bottom: 30px; }
+        .return-link { margin-top: 30px; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>"""
+        header_template = """<body>
+    <div class="container">"""
+        footer_template = """    </div>
+</body>
+</html>"""
     
     articles = []
     
@@ -79,27 +173,27 @@ def generate_articles():
                 'content': html_content
             })
             
-            # 生成文章HTML
+            # 生成带主题的文章HTML
+            # 修改<head>中的标题
+            custom_head = head_template.replace('<title>', f'<title>{title} - ')
+            if '<title>' not in head_template:
+                custom_head = custom_head.replace('</head>', f'<title>{title}</title></head>')
+            
             html = f"""<!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <title>{title}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-    <article>
-        <h1>{title}</h1>
-        <div>发布日期: {date_formatted}</div>
-        <div>
+{custom_head}
+{header_template}
+    <article class="post">
+        <h1 class="post-title">{title}</h1>
+        <div class="post-meta">发布日期: {date_formatted}</div>
+        <div class="post-content">
             {html_content}
         </div>
-        <div>
+        <div class="return-link">
             <a href="../index.html">返回首页</a>
         </div>
     </article>
-</body>
-</html>"""
+{footer_template}"""
             
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(html)
