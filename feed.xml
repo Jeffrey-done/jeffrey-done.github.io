@@ -5,39 +5,23 @@
         <link>http://localhost:8000</link>
         <description>分享技术与生活</description>
         <language>zh-CN</language>
-        <pubDate>Sun, 16 Mar 2025 11:41:17 </pubDate>
-        <lastBuildDate>Sun, 16 Mar 2025 11:41:17 </lastBuildDate>
+        <pubDate>Sat, 05 Apr 2025 04:07:36 </pubDate>
+        <lastBuildDate>Sat, 05 Apr 2025 04:07:36 </lastBuildDate>
         <atom:link href="http://localhost:8000/feed.xml" rel="self" type="application/rss+xml" />
         
         
         <item>
-            <title>你好，世界</title>
-            <link>http://localhost:8000/posts/hello-world.html</link>
-            <description><![CDATA[<p>这是我的第一篇博客文章。</p>
-<h2 id="_1">关于这个博客</h2>
-<p>这是使用 Cato 静态博客生成器创建的网站。</p>
-<h2 id="_2">功能特点</h2>
-<ol>
-<li>支持 Markdown 写作</li>
-<li>自动生成标签页面</li>
-<li>响应式设计</li>
-<li>RSS 订阅支持</li>
-</ol>
-<h2 id="_3">代码示例</h2>
-<div class="codehilite"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello, World!&quot;</span><span class="p">)</span>
-</code></pre></div>
-
-<p>祝您使用愉快！</p>]]></description>
-            <pubDate>Sun, 16 Mar 2025 11:41:16 </pubDate>
-            <guid>http://localhost:8000/posts/hello-world.html</guid>
+            <title>测试恢复</title>
+            <link>http://localhost:8000/posts/2025-04-05-测试恢复.html</link>
+            <description><![CDATA[<p>测试测试测试</p>]]></description>
+            <pubDate>Sat, 05 Apr 2025 00:00:00 </pubDate>
+            <guid>http://localhost:8000/posts/2025-04-05-测试恢复.html</guid>
             
             <author>博主</author>
             
             
             
-            <category>示例</category>
-            
-            <category>博客</category>
+            <category>测试，后台</category>
             
             
         </item>
@@ -233,18 +217,6 @@
             <description><![CDATA[<p>美美的测试一下后台文件</p>]]></description>
             <pubDate>Sun, 16 Mar 2025 00:00:00 </pubDate>
             <guid>http://localhost:8000/posts/2025-03-16-测试后台.html</guid>
-            
-            <author>博主</author>
-            
-            
-        </item>
-        
-        <item>
-            <title>测试顶顶顶</title>
-            <link>http://localhost:8000/posts/2025-03-16-测试顶顶顶.html</link>
-            <description><![CDATA[<!-- 在此输入文章内容 -->]]></description>
-            <pubDate>Sun, 16 Mar 2025 00:00:00 </pubDate>
-            <guid>http://localhost:8000/posts/2025-03-16-测试顶顶顶.html</guid>
             
             <author>博主</author>
             
