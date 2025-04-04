@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+=======
+# 忽略所有文件和目录
+/*
+
+# 不忽略 public 目录中的内容
+!/*.html
+!/css/
+!/posts/
+!/tags/
+!feed.xml
+
+>>>>>>> 96a74da55889f0325f84ddad131008fed408ed0c
 # 忽略系统文件
 .DS_Store
 Thumbs.db
@@ -6,9 +19,14 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 
+<<<<<<< HEAD
 # 忽略构建目录
 /public/
 
 # 忽略临时文件
 *.bak
 *.tmp
+=======
+
+
+>>>>>>> 96a74da55889f0325f84ddad131008fed408ed0c
